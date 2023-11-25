@@ -9,6 +9,7 @@ class Collection {
     this.config = this.brain.config;
     this.items = {};
     this.keys = [];
+    if(!disk_class) disk_class = require('./Disk.js').Disk;
     this.disk = new disk_class(this);
   }
   static async load(brain, disk_class) {
