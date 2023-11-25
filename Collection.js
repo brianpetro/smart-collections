@@ -1,5 +1,6 @@
 const path = require('path');
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor; // for checking if function is async
+const { CollectionItem } = require('./CollectionItem.js');
 
 // BASE COLLECTION CLASSES
 class Collection {
