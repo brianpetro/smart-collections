@@ -1,0 +1,85 @@
+const { md5, collection_instance_name_from } = require('./Common');
+class CollectionItem {
+  static get defaults() {
+    return {
+      data: {
+        key: null,
+      },
+    };
+  }
+  constructor(brain, data = null) {
+    this.brain = brain;
+    this.config = this.brain?.config;
+    this.merge_defaults();
+    if (data) this.data = data;
+    this.data.class_name = this.constructor.name;
+  }
+  // Merge defaults from all classes in the inheritance chain (from top to bottom, so child classes override parent classes)
+  merge_defaults() {
+    let current_class = this.constructor;
+    while (current_class) { // deep merge defaults
+      for (let key in current_class.defaults) {
+        if (typeof current_class.defaults[key] === 'object') this[key] = { ...current_class.defaults[key], ...this[key] };
+        else this[key] = current_class.defaults[key];
+      }
+      current_class = Object.getPrototypeOf(current_class);
+    }
+  }
+  // OVERRIDE IN CHILD CLASSES to customize key
+  get_key() {
+    console.log("called default get_key");
+    return md5(JSON.stringify(this.data));
+  }
+  // update_data - for data in this.data
+  update_data(data) {
+    data = JSON.parse(JSON.stringify(data, (key, value) => {
+      if (value instanceof CollectionItem) return value.key;
+      if (Array.isArray(value) && value[0] instanceof CollectionItem) return value.map((item) => item.key);
+      return value;
+    }));
+    // deep merge data
+    this.deep_merge(this.data, data);
+  }
+  // init - for data not in this.data
+  init() { this.save(); } // should always call this.save() in child class init() overrides
+  save() {
+    if (!this.validate_save()) throw new Error("Invalid save data: " + JSON.stringify(this.data));
+    this.collection.set(this); // set entity in collection
+    this.collection.save(); // save collection
+  }
+  validate_save() {
+    if (!this.key) return false;
+    if (this.key === '') return false;
+    if (this.key.includes('undefined')) return false;
+    return true;
+  }
+  delete() { this.collection.delete(this.key); }
+  // functional filter (returns true or false) for filtering items in collection; called by collection class
+  filter(opts={}) {
+    if (opts.exclude_keys?.includes(this.key)) return false;
+    // OVERRIDE FILTER LOGIC here: pattern: if(opts.pattern && !this.data[opts.pattern.matcher]) return false;
+    return true;
+  }
+  parse() { }
+  // HELPER FUNCTIONS
+  deep_merge(target, source) {
+    for (const key in source) {
+      if (source.hasOwnProperty(key)) {
+        // both exist and are objects
+        if (is_obj(source[key]) && is_obj(target[key])) this.deep_merge(target[key], source[key]);
+        else target[key] = source[key]; // precedence to source
+      }
+    }
+    return target;
+    function is_obj(item) { return (item && typeof item === 'object' && !Array.isArray(item)); }
+  }
+  // CONVENIENCE METHODS (namespace getters)
+  static get collection_name() { return collection_instance_name_from(this.name); }
+  get collection_name() { return this.constructor.collection_name; }
+  get collection() { return this.brain[this.collection_name]; }
+  get key() { return this.data.key = this.data.key || this.get_key(); }
+  get ref() { return { collection_name: this.collection_name, key: this.key }; }
+  get seq_key() { return this.key; } // used for building sequence keys
+}
+
+exports.CollectionItem = CollectionItem;
