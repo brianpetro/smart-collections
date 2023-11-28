@@ -158,13 +158,14 @@ class CollectionItem {
   }
   // update_data - for data in this.data
   update_data(data) {
-    data = JSON.parse(JSON.stringify(data, (key, value) => {
-      if (value instanceof CollectionItem) return value.key;
-      if (Array.isArray(value) && value[0] instanceof CollectionItem) return value.map((item) => item.key);
-      return value;
-    }));
+    data = JSON.parse(JSON.stringify(data, this.update_data_replacer));
     // deep merge data
     this.deep_merge(this.data, data);
+  }
+  update_data_replacer(key, value) {
+    if (value instanceof CollectionItem) return value.ref;
+    if (Array.isArray(value)) return value.map((val) => (val instanceof CollectionItem) ? val.ref : val);
+    return value;
   }
   // init - for data not in this.data
   init() { this.save(); } // should always call this.save() in child class init() overrides
