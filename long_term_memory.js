@@ -1,8 +1,36 @@
+// const { AJSON } = require('./AJSON.js');
+class LongTermMemory {
+  constructor(collection) {
+    this.collection = collection;
+    this.save_timeout = null;
+  }
+  static wake_up(collection, ltm_class='AJSON') {
+    const ltm_classes = { LongTermMemory, AJSON };
+    const ltm = new ltm_classes[ltm_class](collection);
+    return ltm;
+  }
+  get collection_name() { return this.collection.collection_name; }
+  get item_name() { return this.collection.item_name; }
+  get file_name() { return this.collection.file_name; }
+  get folder_path() { return this.collection.folder_path; }
+  get data_path() { return this.collection.data_path; }
+  get items() { return this.collection.items; }
+  set items(items) { this.collection.items = items; }
+  get keys() { return this.collection.keys; }
+  set keys(keys) { this.collection.keys = keys; }
+  async load() { }
+  save() { if (this.constructor.name !== 'LongTermMemory') console.log("called default, override me"); }
+  async _save() { if (this.constructor.name !== 'LongTermMemory') console.log("called default, override me"); }
+  reviver(key, value) { return this.collection.reviver(key, value); }
+  replacer(key, value) { return this.collection.replacer(key, value); }
+}
+exports.LongTermMemory = LongTermMemory;
+
 const fs = require('fs');
 const path = require('path');
-const { Disk } = require('./Disk.js');
+// const { LongTermMemory } = require('./long_term_memory');
 
-class AJSON extends Disk {
+class AJSON extends LongTermMemory {
   async load() {
     console.log("Loading: " + this.data_path);
     try {
