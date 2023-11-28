@@ -13,8 +13,8 @@ class Disk {
   get keys() { return this.collection.keys; }
   set keys(keys) { this.collection.keys = keys; }
   async load() { }
-  save() { }
-  async _save() { }
+  save() { console.log("called default, override me"); }
+  async _save() { console.log("called default, override me"); }
   reviver(key, value) { return this.collection.reviver(key, value); }
   replacer(key, value) { return this.collection.replacer(key, value); }
 }

@@ -1,17 +1,18 @@
 const path = require('path');
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor; // for checking if function is async
 const { CollectionItem } = require('./CollectionItem.js');
+const { AJSON } = require('./AJSON.js');
+const disk_classes = { AJSON };
 
 // BASE COLLECTION CLASSES
 class Collection {
-  constructor(brain, disk_class) {
+  constructor(brain, disk_class="AJSON") {
     this.brain = brain;
     this.main = this.brain.main;
     this.config = this.brain.config;
     this.items = {};
     this.keys = [];
-    if(!disk_class) disk_class = require('./Disk.js').Disk;
-    this.disk = new disk_class(this);
+    this.disk = new disk_classes[disk_class](this);
   }
   static async load(brain, disk_class) {
     // const timestamp = Date.now();
@@ -33,7 +34,8 @@ class Collection {
     // console.log(Object.keys(this));
   }
   // SAVE/LOAD
-  save() { this.disk.save(); }
+  save() { console.log("Saving: " + this.file_name); 
+    this.disk.save(); }
   async load() { await this.disk.load(); }
   reviver(key, value) {
     if (typeof value !== 'object' || value === null) return value; // skip non-objects, quick return

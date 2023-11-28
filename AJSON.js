@@ -12,7 +12,6 @@ class AJSON extends Disk {
     } catch (err) {
       console.log("Error loading: " + this.data_path);
       console.log(err.stack); // stack trace
-
       // Create folder and file if they don't exist
       try {
         fs.mkdirSync(this.folder_path, { recursive: true });
@@ -26,6 +25,7 @@ class AJSON extends Disk {
   }
   // wraps _save in timeout to prevent multiple saves at once
   save() {
+    console.log("Saving: " + this.file_name);
     if (this.save_timeout) clearTimeout(this.save_timeout);
     this.save_timeout = setTimeout(this._save.bind(this), 1000);
   }
@@ -34,11 +34,16 @@ class AJSON extends Disk {
     this.save_timeout = null;
     const start = Date.now();
     console.log("Saving: " + this.file_name);
-    fs.writeFileSync(
-      this.data_path,
-      JSON.stringify(this.items, this.replacer.bind(this), 2).slice(0, -1).slice(1) + ",\n",
-      (err) => { if (err) console.log(err); }
-    );
+    try{
+      fs.writeFileSync(
+        this.data_path,
+        JSON.stringify(this.items, this.replacer.bind(this), 2).slice(0, -1).slice(1) + ",\n",
+      );
+    } catch (err) {
+      console.error("Error saving: " + this.file_name);
+      console.error(err.stack);
+      return;
+    }
     const end = Date.now(); // log time
     const time = end - start;
     console.log("Saved " + this.file_name + " in " + time + "ms");
