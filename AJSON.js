@@ -25,7 +25,7 @@ class AJSON extends Disk {
   }
   // wraps _save in timeout to prevent multiple saves at once
   save() {
-    console.log("Saving: " + this.file_name);
+    // console.log("Saving: " + this.file_name);
     if (this.save_timeout) clearTimeout(this.save_timeout);
     this.save_timeout = setTimeout(this._save.bind(this), 1000);
   }

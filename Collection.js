@@ -34,8 +34,7 @@ class Collection {
     // console.log(Object.keys(this));
   }
   // SAVE/LOAD
-  save() { console.log("Saving: " + this.file_name); 
-    this.disk.save(); }
+  save() { this.disk.save(); }
   async load() { await this.disk.load(); }
   reviver(key, value) {
     if (typeof value !== 'object' || value === null) return value; // skip non-objects, quick return
