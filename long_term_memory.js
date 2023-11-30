@@ -1,4 +1,6 @@
-// const { AJSON } = require('./AJSON.js');
+const fs = require('fs');
+const path = require('path');
+
 class LongTermMemory {
   constructor(collection) {
     this.collection = collection;
@@ -24,11 +26,6 @@ class LongTermMemory {
   reviver(key, value) { return this.collection.reviver(key, value); }
   replacer(key, value) { return this.collection.replacer(key, value); }
 }
-exports.LongTermMemory = LongTermMemory;
-
-const fs = require('fs');
-const path = require('path');
-// const { LongTermMemory } = require('./long_term_memory');
 
 class AJSON extends LongTermMemory {
   async load() {
@@ -77,5 +74,6 @@ class AJSON extends LongTermMemory {
     console.log("Saved " + this.file_name + " in " + time + "ms");
   }
 }
-
+// EXPORTS
 exports.AJSON = AJSON;
+exports.LongTermMemory = LongTermMemory;

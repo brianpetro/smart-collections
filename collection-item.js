@@ -61,7 +61,7 @@ class Collection {
     const existing = this.find_by(data);
     const item = existing ? existing : new this.item_type(this.brain);
     item.update_data(data); // handles this.data
-    item.save(); // call save to make it available in collection
+    if(item.validate_save()) item.save(); // call save to make it available in collection (if valid)
     // dynamically handle async init functions
     if (item.init instanceof AsyncFunction) return new Promise((resolve, reject) => { item.init(data).then(() => resolve(item)); });
     item.init(data); // handles functions that involve other items
@@ -164,8 +164,7 @@ class CollectionItem {
   // update_data - for data in this.data
   update_data(data) {
     data = JSON.parse(JSON.stringify(data, this.update_data_replacer));
-    // deep merge data
-    this.deep_merge(this.data, data);
+    this.deep_merge(this.data, data); // deep merge data
   }
   update_data_replacer(key, value) {
     if (value instanceof CollectionItem) return value.ref;
@@ -175,7 +174,10 @@ class CollectionItem {
   // init - for data not in this.data
   init() { this.save(); } // should always call this.save() in child class init() overrides
   save() {
-    if (!this.validate_save()) throw new Error("Invalid save data: " + JSON.stringify(this.data));
+    if(!this.validate_save()){
+      if(this.key) this.collection.delete(this.key);
+      return console.error("Invalid save: ", {data: this.data, stack: new Error().stack});
+    }
     this.collection.set(this); // set entity in collection
     this.collection.save(); // save collection
   }
