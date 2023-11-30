@@ -46,13 +46,16 @@ class Collection {
   // SAVE/LOAD
   save() { this.LTM.save(); }
   async load() { await this.LTM.load(); }
-  reviver(key, value) {
+  reviver(key, value) { // JSON.parse reviver
     if (typeof value !== 'object' || value === null) return value; // skip non-objects, quick return
     if (value.class_name) return new (this.brain.item_types[value.class_name])(this.brain, value);
     return value;
   }
-  replacer(key, value) { return (value instanceof CollectionItem) ? value.data : value; } // JSON.stringify Replacer
-
+  replacer(key, value) { // JSON.stringify replacer
+    if (value instanceof this.item_type) return value.data;
+    if (value instanceof CollectionItem) return value.ref;
+    return value;
+  }
   // CREATE
   create_or_update(data = {}) {
     const existing = this.find_by(data);
@@ -98,7 +101,6 @@ class Collection {
   clear() {
     this.items = {};
     this.keys = [];
-    this.save();
   }
   delete(key) {
     delete this.items[key];
