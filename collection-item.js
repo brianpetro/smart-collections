@@ -75,7 +75,10 @@ class Collection {
   // READ
   filter(opts) { return this.keys.filter(key => this.items[key].filter(opts)).map((key) => this.items[key]); }
   get(key) { return this.items[key]; }
-  get_many(keys = []) { return keys.map((key) => this.get(key)); }
+  get_many(keys = []) {
+    if(Array.isArray(keys)) return keys.map((key) => this.get(key));
+    console.error("get_many called with non-array keys: ", keys);
+  }
   get_rand(filter_opts = null) {
     if (filter_opts) {
       console.log("filter_opts: ", filter_opts);

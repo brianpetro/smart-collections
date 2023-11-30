@@ -43,6 +43,7 @@ async function init(opts = {}) {
         grand_config: 'grand_config_value',
       },
     },
+    data_path: './tmp',
   };
   await brain.init();
   const test_collection = brain.test_items;
