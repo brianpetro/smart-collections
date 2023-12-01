@@ -15,7 +15,8 @@ class Brain {
   }
   async init() { await Promise.all(Object.entries(this.collections).map(async ([collection_name, collection]) => this[collection_name] = await collection.load(this))); }
   get_ref(ref) { return this[ref.collection_name].get(ref.key); }
-  get data_path() { return './' }
+  get data_path() { return './data' }
+  get user_path() { return path.join(this.data_path, 'user'); }
 }
 // BASE COLLECTION CLASSES
 class Collection {
