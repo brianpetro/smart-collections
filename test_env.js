@@ -1,5 +1,6 @@
 const { 
   Brain,
+  LongTermMemory,
   Parent,
   Child,
   Grand,
@@ -13,7 +14,7 @@ async function init(opts = {}) {
   const {
     key = 'test',
   } = opts;
-  const brain = new Brain('LongTermMemory');
+  const brain = new Brain(LongTermMemory);
   brain.item_types = {
     TestItem,
     Parent,

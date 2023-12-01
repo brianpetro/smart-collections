@@ -1,18 +1,21 @@
 const path = require('path');
 const { md5, collection_instance_name_from } = require('./helpers');
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor; // for checking if function is async
-const { LongTermMemory: LTM, AJSON } = require('./long_term_memory.js');
+const { LongTermMemory: LTM } = require('./long_term_memory.js');
+const { AJSON } = require('./AJSON.js');
+const { ObsidianAJSON } = require('./ObsidianAJSON.js');
 // ORCHESTRATOR CLASS
 class Brain {
-  constructor(ltm_class='AJSON') {
+  constructor(ltm_adapter) {
     this.config = {};
     this.main = {};
     this.item_types = {};
     this.collections = {};
-    this.ltm_class = ltm_class;
+    this.ltm_adapter = ltm_adapter;
   }
   async init() { await Promise.all(Object.entries(this.collections).map(async ([collection_name, collection]) => this[collection_name] = await collection.load(this))); }
   get_ref(ref) { return this[ref.collection_name].get(ref.key); }
+  get data_path() { return './' }
 }
 // BASE COLLECTION CLASSES
 class Collection {
@@ -22,7 +25,7 @@ class Collection {
     this.config = this.brain.config;
     this.items = {};
     this.keys = [];
-    this.LTM = LTM.wake_up(this, this.brain.ltm_class);
+    this.LTM = this.brain.ltm_adapter.wake_up(this, this.brain.ltm_adapter);
   }
   static async load(brain) {
     // const timestamp = Date.now();
@@ -36,7 +39,7 @@ class Collection {
   merge_defaults() {
     let current_class = this.constructor;
     while (current_class) { // merge collection config into item config
-      const col_conf = this.config.collections[current_class.collection_name];
+      const col_conf = this.config?.collections?.[current_class.collection_name];
       Object.entries((typeof col_conf === 'object') ? col_conf : {})
         .forEach(([key, value]) => this[key] = value);
       current_class = Object.getPrototypeOf(current_class);
@@ -123,9 +126,6 @@ class Collection {
   // CONVENIENCE METHODS (namespace getters)
   static get collection_name() { return this.name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }
   get collection_name() { return this.constructor.collection_name; }
-  get data_path() { return path.join(this.folder_path, this.file_name); }
-  get file_name() { return this.collection_name + '.ajson'; }
-  get folder_path() { return path.join(this.config.data_path, this.config.account); }
   get item_class_name() { return this.constructor.name.slice(0, -1).replace(/(ie)$/g, 'y'); } // remove 's' from end of name & if name ends in 'ie', replace with 'y'
   get item_name() { return this.item_class_name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }
   get item_type() { return this.brain.item_types[this.item_class_name]; }
@@ -222,3 +222,4 @@ exports.Collection = Collection;
 exports.CollectionItem = CollectionItem;
 exports.LongTermMemory = LTM;
 exports.AJSON = AJSON;
+exports.ObsidianAJSON = ObsidianAJSON;

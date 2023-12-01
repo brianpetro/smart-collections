@@ -1,4 +1,4 @@
-const { Brain, Collection, CollectionItem } = require('./collection-item');
+const { Brain, Collection, CollectionItem, LongTermMemory } = require('./collection-item');
 // mock sub classes
 class TestItems extends Collection { }
 class TestItem extends CollectionItem { }
@@ -42,6 +42,7 @@ class Grand extends CollectionItem {
   get_key() { return 'grand_key'; }
 }
 exports.Brain = Brain;
+exports.LongTermMemory = LongTermMemory;
 exports.Collection = Collection;
 exports.CollectionItem = CollectionItem;
 exports.Parent = Parent;
