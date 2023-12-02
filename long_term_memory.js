@@ -10,9 +10,9 @@ class LongTermMemory {
   }
   get collection_name() { return this.collection.collection_name; }
   get item_name() { return this.collection.item_name; }
-  get data_path() { return this.brain.user_path; }
+  get data_path() { return this.brain.data_path; }
   get file_name() { return this.collection.collection_name; }
-  get file_path() { return this.user_path + '/' + this.file_name; }
+  get file_path() { return this.data_path + '/' + this.file_name; }
   get items() { return this.collection.items; }
   set items(items) { this.collection.items = items; }
   get keys() { return this.collection.keys; }

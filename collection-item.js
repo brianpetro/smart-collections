@@ -15,8 +15,7 @@ class Brain {
   }
   async init() { await Promise.all(Object.entries(this.collections).map(async ([collection_name, collection]) => this[collection_name] = await collection.load(this))); }
   get_ref(ref) { return this[ref.collection_name].get(ref.key); }
-  get data_path() { return './data' }
-  get user_path() { return path.join(this.data_path, 'user'); }
+  get data_path() { return './data/test' }
 }
 // BASE COLLECTION CLASSES
 class Collection {
@@ -101,6 +100,7 @@ class Collection {
     this.items[item.key] = item;
     if (!this.keys.includes(item.key)) this.keys.push(item.key);
   }
+  update_many(keys=[], data={}) { this.get_many(keys).forEach((item) => item.update_data(data)); }
   // DESTROY
   clear() {
     this.items = {};
@@ -126,7 +126,8 @@ class Collection {
   reparse(reset = true) { Object.values(this.items).forEach((item) => item.parse(reset)); }
   // CONVENIENCE METHODS (namespace getters)
   static get collection_name() { return this.name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }
-  get collection_name() { return this.constructor.collection_name; }
+  get collection_name() { return (this._collection_name) ? this._collection_name : this.constructor.collection_name; }
+  set collection_name(name) { this._collection_name = name; }
   get item_class_name() { return this.constructor.name.slice(0, -1).replace(/(ie)$/g, 'y'); } // remove 's' from end of name & if name ends in 'ie', replace with 'y'
   get item_name() { return this.item_class_name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }
   get item_type() { return this.brain.item_types[this.item_class_name]; }
@@ -210,7 +211,7 @@ class CollectionItem {
   }
   // CONVENIENCE METHODS (namespace getters)
   static get collection_name() { return collection_instance_name_from(this.name); }
-  get collection_name() { return this.constructor.collection_name; }
+  get collection_name() { return this.data.collection_name || this.constructor.collection_name; }
   get collection() { return this.brain[this.collection_name]; }
   get key() { return this.data.key = this.data.key || this.get_key(); }
   get ref() { return { collection_name: this.collection_name, key: this.key }; }
