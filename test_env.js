@@ -46,6 +46,7 @@ async function init(opts = {}) {
     },
     data_path: './tmp',
   };
+  if(opts.config) Object.assign(brain.config, opts.config);
   await brain.init();
   const test_collection = brain.test_items;
   const test_item = test_collection.create_or_update({ key });
