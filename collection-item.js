@@ -111,19 +111,6 @@ class Collection {
     this.keys = this.keys.filter((k) => k !== key);
     this.save();
   }
-  parse(source) {
-    const parse_fx_name = `parse_${source.collection.item_name}`; // e.g. parse_turn, parse_manychat_thread
-    if (typeof this[parse_fx_name] === 'function') {
-      this[parse_fx_name](source);
-    } else if (typeof this.item_type[parse_fx_name] === 'function') {
-      this.item_type[parse_fx_name](this.brain, source);
-    } else if (this.item_type.parse) {
-      this.item_type.parse(this.brain, source);
-    } else {
-      console.log(`No parse function found for ${source.collection.item_name} in ${this.item_name}`);
-    }
-  }
-  reparse(reset = true) { Object.values(this.items).forEach((item) => item.parse(reset)); }
   // CONVENIENCE METHODS (namespace getters)
   static get collection_name() { return this.name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }
   get collection_name() { return (this._collection_name) ? this._collection_name : this.constructor.collection_name; }
