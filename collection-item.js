@@ -1,4 +1,5 @@
-const { md5 } = require('./helpers');
+const helpers = require('./helpers');
+const { md5, deep_merge, collection_instance_name_from } = helpers;
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor; // for checking if function is async
 const { LongTermMemory: LTM } = require('./long_term_memory.js');
 const { AJSON } = require('./AJSON.js');
@@ -152,7 +153,7 @@ class CollectionItem {
   // update_data - for data in this.data
   update_data(data) {
     data = JSON.parse(JSON.stringify(data, this.update_data_replacer));
-    this.deep_merge(this.data, data); // deep merge data
+    deep_merge(this.data, data); // deep merge data
   }
   update_data_replacer(key, value) {
     if (value instanceof CollectionItem) return value.ref;
@@ -184,19 +185,8 @@ class CollectionItem {
   }
   parse() { }
   // HELPER FUNCTIONS
-  deep_merge(target, source) {
-    for (const key in source) {
-      if (source.hasOwnProperty(key)) {
-        // both exist and are objects
-        if (is_obj(source[key]) && is_obj(target[key])) this.deep_merge(target[key], source[key]);
-        else target[key] = source[key]; // precedence to source
-      }
-    }
-    return target;
-    function is_obj(item) { return (item && typeof item === 'object' && !Array.isArray(item)); }
-  }
   // CONVENIENCE METHODS (namespace getters)
-  // static get collection_name() { return collection_instance_name_from(this.name); }
+  static get collection_name() { return collection_instance_name_from(this.name); }
   static get collection_name() { return this.name
     .replace(/([a-z])([A-Z])/g, '$1_$2') // convert camelCase to snake_case
     .toLowerCase() // convert to lowercase
@@ -217,3 +207,4 @@ exports.CollectionItem = CollectionItem;
 exports.LongTermMemory = LTM;
 exports.AJSON = AJSON;
 exports.ObsidianAJSON = ObsidianAJSON;
+exports.helpers = helpers;
