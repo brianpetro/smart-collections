@@ -1,5 +1,4 @@
-const path = require('path');
-const { md5, collection_instance_name_from } = require('./helpers');
+const { md5 } = require('./helpers');
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor; // for checking if function is async
 const { LongTermMemory: LTM } = require('./long_term_memory.js');
 const { AJSON } = require('./AJSON.js');
@@ -197,8 +196,14 @@ class CollectionItem {
     function is_obj(item) { return (item && typeof item === 'object' && !Array.isArray(item)); }
   }
   // CONVENIENCE METHODS (namespace getters)
-  static get collection_name() { return collection_instance_name_from(this.name); }
-  get collection_name() { return this.data.collection_name || this.constructor.collection_name; }
+  // static get collection_name() { return collection_instance_name_from(this.name); }
+  static get collection_name() { return this.name
+    .replace(/([a-z])([A-Z])/g, '$1_$2') // convert camelCase to snake_case
+    .toLowerCase() // convert to lowercase
+    .replace(/y$/, 'ie') // ex. summaries
+    + 's';
+  }
+  get collection_name() { return this.data.collection_name ? this.data.collection_name : this.constructor.collection_name; }
   get collection() { return this.brain[this.collection_name]; }
   get key() { return this.data.key = this.data.key || this.get_key(); }
   get ref() { return { collection_name: this.collection_name, key: this.key }; }
