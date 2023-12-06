@@ -1,6 +1,6 @@
 // HASHING
 const crypto = require('crypto');
-function md5(string) { return crypto.createHash('md5').update(string).digest('hex'); }
+function md5(string) { return crypto.createHash('md5').update(String(string)).digest('hex'); }
 exports.md5 = md5;
 // DEEP MERGE
 function deep_merge(target, source) {
@@ -36,9 +36,6 @@ function get_readable_time(time_in_ms) {
   else return '';
 }
 exports.get_readable_time = get_readable_time;
-// CLI ARGS
-function get_arg(name) { return process.argv.slice(2).find((arg) => arg.startsWith(`--${name}=`))?.split('=')[1]; }
-exports.get_arg = get_arg;
 // COSINE SIMILARITY
 function cos_sim(vector1, vector2) {
   const dotProduct = vector1.reduce((acc, val, i) => acc + val * vector2[i], 0);
