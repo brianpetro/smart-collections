@@ -1,5 +1,5 @@
 const { Brain, Collection, CollectionItem, LongTermMemory } = require('./collection-item');
-// mock sub classes
+// MOCKS
 class TestItems extends Collection { }
 class TestItem extends CollectionItem { }
 class Parents extends Collection { }
@@ -41,6 +41,9 @@ class Grand extends CollectionItem {
   }
   get_key() { return 'grand_key'; }
 }
+// STUBS
+Brain.prototype.load_config = () => { };
+// EXPORTS
 exports.Brain = Brain;
 exports.LongTermMemory = LongTermMemory;
 exports.Collection = Collection;
