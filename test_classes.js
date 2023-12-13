@@ -1,4 +1,4 @@
-const { Brain, Collection, CollectionItem, LongTermMemory } = require('./collection-item');
+const { Brain, Collection, CollectionItem, LongTermMemory } = require('./smart-collections');
 // MOCKS
 class TestItems extends Collection { }
 class TestItem extends CollectionItem { }
