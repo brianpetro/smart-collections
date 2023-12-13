@@ -27,12 +27,15 @@ class Collection {
     this.keys = [];
     this.LTM = this.brain.ltm_adapter.wake_up(this, this.brain.ltm_adapter);
   }
-  static async load(brain) {
-    // const timestamp = Date.now();
+  static load(brain, config = {}) {
+    const { custom_collection_name } = config;
     brain[this.collection_name] = new this(brain);
+    if(custom_collection_name){
+      brain[this.collection_name].collection_name = custom_collection_name;
+      brain.collections[custom_collection_name] = this.constructor;
+    }
     brain[this.collection_name].merge_defaults();
-    await brain[this.collection_name].load();
-    // console.log("Loaded " + this.collection_name + " in " + (Date.now() - timestamp) + "ms");
+    brain[this.collection_name].load();
     return brain[this.collection_name];
   }
   // Merge defaults from all classes in the inheritance chain (from top to bottom, so child classes override parent classes)

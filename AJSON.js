@@ -3,12 +3,14 @@ const path = require('path');
 const { LongTermMemory } = require('./long_term_memory');
 
 class AJSON extends LongTermMemory {
-  async load() {
+  load() {
     console.log("Loading: " + this.file_path);
+    // const timestamp = Date.now();
     try {
       const file_content = fs.readFileSync(this.file_path, 'utf8');
       this.items = JSON.parse(`{${file_content.slice(0, -2)}}`, this.reviver.bind(this));
       this.keys = Object.keys(this.items);
+      // console.log("Loaded " + this.file_path + " in " + (Date.now() - timestamp) + "ms");
     } catch (err) {
       console.log("Error loading: " + this.file_path);
       console.log(err.stack); // stack trace
@@ -31,7 +33,7 @@ class AJSON extends LongTermMemory {
     this.save_timeout = setTimeout(this._save.bind(this), 1000);
   }
   // saves collection to file
-  async _save() {
+  _save() {
     this.save_timeout = null;
     const start = Date.now();
     console.log("Saving: " + this.file_name);
