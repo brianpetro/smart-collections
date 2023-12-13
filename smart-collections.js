@@ -51,7 +51,7 @@ class Collection {
   }
   // SAVE/LOAD
   save() { this.LTM.save(); }
-  async load() { await this.LTM.load(); }
+  load() { this.LTM.load(); }
   reviver(key, value) { // JSON.parse reviver
     if (typeof value !== 'object' || value === null) return value; // skip non-objects, quick return
     if (value.class_name) return new (this.brain.item_types[value.class_name])(this.brain, value);
