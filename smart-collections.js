@@ -13,7 +13,7 @@ class Brain {
     this.collections = {};
     this.ltm_adapter = ltm_adapter;
   }
-  async init() { await Promise.all(Object.entries(this.collections).map(async ([collection_name, collection]) => this[collection_name] = await collection.load(this))); }
+  init() { Object.entries(this.collections).map(async ([collection_name, collection]) => this[collection_name] = collection.load(this)); }
   get_ref(ref) { return this[ref.collection_name].get(ref.key); }
   get data_path() { return './data/test' }
 }
@@ -190,12 +190,12 @@ class CollectionItem {
   // HELPER FUNCTIONS
   // CONVENIENCE METHODS (namespace getters)
   static get collection_name() { return collection_instance_name_from(this.name); }
-  static get collection_name() { return this.name
-    .replace(/([a-z])([A-Z])/g, '$1_$2') // convert camelCase to snake_case
-    .toLowerCase() // convert to lowercase
-    .replace(/y$/, 'ie') // ex. summaries
-    + 's';
-  }
+  // static get collection_name() { return this.name
+  //   .replace(/([a-z])([A-Z])/g, '$1_$2') // convert camelCase to snake_case
+  //   .toLowerCase() // convert to lowercase
+  //   .replace(/y$/, 'ie') // ex. summaries
+  //   + 's';
+  // }
   get collection_name() { return this.data.collection_name ? this.data.collection_name : this.constructor.collection_name; }
   get collection() { return this.brain[this.collection_name]; }
   get key() { return this.data.key = this.data.key || this.get_key(); }

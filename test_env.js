@@ -10,10 +10,7 @@ const {
   Childs,
   Grands,
 } = require('./test_classes');
-async function init(opts = {}) {
-  const {
-    key = 'test',
-  } = opts;
+function init_brain(t, opts = {}) {
   const brain = new Brain(LongTermMemory);
   brain.item_types = {
     TestItem,
@@ -47,9 +44,21 @@ async function init(opts = {}) {
     data_path: './tmp',
   };
   if(opts.config) Object.assign(brain.config, opts.config);
-  await brain.init();
-  const test_collection = brain.test_items;
-  const test_item = test_collection.create_or_update({ key });
-  return { brain, test_collection, test_item };
+  brain.init();
+  return t.context = {
+    ...t.context,
+    brain,
+  };
 }
-exports.init = init;
+function init_test_item(t){
+  const { brain } = t.context;
+  const test_collection = brain.test_items;
+  const test_item = test_collection.create_or_update({ key: 'test' });
+  return t.context = {
+    ...t.context,
+    test_collection,
+    test_item,
+  };
+}
+exports.init_brain = init_brain;
+exports.init_test_item = init_test_item;
