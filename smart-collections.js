@@ -8,7 +8,6 @@ const { ObsidianAJSON } = require('./ObsidianAJSON.js');
 class Brain {
   constructor(ltm_adapter) {
     this.config = {};
-    this.main = {};
     this.item_types = {};
     this.collections = {};
     this.ltm_adapter = ltm_adapter;
@@ -21,7 +20,6 @@ class Brain {
 class Collection {
   constructor(brain) {
     this.brain = brain;
-    this.main = this.brain.main;
     this.config = this.brain.config;
     this.items = {};
     this.keys = [];
