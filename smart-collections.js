@@ -6,15 +6,15 @@ const { AJSON } = require('./AJSON.js');
 const { ObsidianAJSON } = require('./ObsidianAJSON.js');
 // ORCHESTRATOR CLASS
 class Brain {
-  constructor(ltm_adapter) {
+  constructor(ltm_adapter=LTM) {
     this.config = {};
     this.item_types = {};
     this.collections = {};
+    this.data_path = './test/data';
     this.ltm_adapter = ltm_adapter;
   }
   init() { Object.entries(this.collections).map(async ([collection_name, collection]) => this[collection_name] = collection.load(this)); }
   get_ref(ref) { return this[ref.collection_name].get(ref.key); }
-  get data_path() { return './data/test' }
 }
 // BASE COLLECTION CLASSES
 class Collection {

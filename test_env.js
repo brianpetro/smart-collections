@@ -1,6 +1,5 @@
 const { 
   Brain,
-  LongTermMemory,
   Parent,
   Child,
   Grand,
@@ -11,7 +10,7 @@ const {
   Grands,
 } = require('./test_classes');
 function init_brain(t, opts = {}) {
-  const brain = new Brain(LongTermMemory);
+  const brain = new Brain();
   brain.item_types = {
     TestItem,
     Parent,
