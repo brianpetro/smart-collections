@@ -10,10 +10,15 @@ class Brain {
     this.config = {};
     this.item_types = {};
     this.collections = {};
-    this.data_path = './test/data';
     this.ltm_adapter = ltm_adapter;
   }
-  init() { Object.entries(this.collections).map(async ([collection_name, collection]) => this[collection_name] = collection.load(this)); }
+  init() {
+    this.data_path = './test/data';
+    this.load_collections();
+  }
+  load_collections() {
+    Object.entries(this.collections).map(([collection_name, collection]) => this[collection_name] = collection.load(this));
+  }
   get_ref(ref) { return this[ref.collection_name].get(ref.key); }
 }
 // BASE COLLECTION CLASSES
@@ -88,9 +93,9 @@ class Collection {
   }
   get_rand(filter_opts = null) {
     if (filter_opts) {
-      console.log("filter_opts: ", filter_opts);
+      // console.log("filter_opts: ", filter_opts);
       const filtered = this.filter(filter_opts);
-      console.log("filtered: " + filtered.length);
+      // console.log("filtered: " + filtered.length);
       return filtered[Math.floor(Math.random() * filtered.length)];
     }
     return this.items[this.keys[Math.floor(Math.random() * this.keys.length)]];
@@ -180,7 +185,8 @@ class CollectionItem {
   delete() { this.collection.delete(this.key); }
   // functional filter (returns true or false) for filtering items in collection; called by collection class
   filter(opts={}) {
-    if (opts.exclude_keys?.includes(this.key)) return false;
+    if(opts.exclude_keys?.includes(this.key)) return false;
+    if(opts.key_ends_with && !this.key.endsWith(opts.key_ends_with)) return false;
     // OVERRIDE FILTER LOGIC here: pattern: if(opts.pattern && !this.data[opts.pattern.matcher]) return false;
     return true;
   }
