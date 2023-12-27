@@ -2,7 +2,7 @@ const { LongTermMemory } = require('./long_term_memory');
 class ObsidianAJSON extends LongTermMemory {
   constructor(collection) {
     super(collection);
-    this.adapter = this.brain.plugin.app.vault.adapter;
+    this.adapter = this.brain.main.app.vault.adapter;
   }
   async load() {
     console.log("Loading: " + this.file_path);
@@ -37,7 +37,7 @@ class ObsidianAJSON extends LongTermMemory {
     console.log("Saving: " + this.file_name);
     try {
       await this.adapter.write(
-        this.data_path,
+        this.file_path,
         JSON.stringify(this.items, this.replacer.bind(this), 2).slice(0, -1).slice(1) + ",\n"
       );
     } catch (err) {
