@@ -26,20 +26,22 @@ class ObsidianAJSON extends LongTermMemory {
   }
   // wraps _save in timeout to prevent multiple saves at once
   save() {
-    // console.log("Saving: " + this.file_name);
     if (this.save_timeout) clearTimeout(this.save_timeout);
-    this.save_timeout = setTimeout(this._save.bind(this), 1000);
+    this.save_timeout = setTimeout(() => { this._save(); }, 10000);
   }
   // saves collection to file
   async _save() {
+    if (this.save_timeout) clearTimeout(this.save_timeout);
     this.save_timeout = null;
+    if(this._saving) return console.log("Already saving: " + this.file_name);
+    this._saving = true; // prevent multiple saves at once
+    setTimeout(() => { this._saving = false; }, 10000); // set _saving to false after 10 seconds
     const start = Date.now();
     console.log("Saving: " + this.file_name);
     try {
-      await this.adapter.write(
-        this.file_path,
-        JSON.stringify(this.items, this.replacer.bind(this), 2).slice(0, -1).slice(1) + ",\n"
-      );
+      const file_content = JSON.stringify(this.items, this.replacer.bind(this), 2);
+      if (file_content.length < 3) return console.log("File content empty, not saving"); // if file content empty, do not save
+      await this.adapter.write( this.file_path, file_content.slice(0, -1).slice(1) + ",\n" );
     } catch (err) {
       console.error("Error saving: " + this.file_name);
       console.error(err.stack);
@@ -48,6 +50,7 @@ class ObsidianAJSON extends LongTermMemory {
     const end = Date.now(); // log time
     const time = end - start;
     console.log("Saved " + this.file_name + " in " + time + "ms");
+    this._saving = false;
   }
   get file_name() { return super.file_name + '.ajson'; }
 }

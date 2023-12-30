@@ -69,8 +69,10 @@ class Collection {
   create_or_update(data = {}) {
     const existing = this.find_by(data);
     const item = existing ? existing : new this.item_type(this.brain);
-    item.update_data(data); // handles this.data
-    if(item.validate_save()) item.save(); // call save to make it available in collection (if valid)
+    item.is_new = !!!existing;
+    const changed = item.update_data(data); // handles this.data
+    if(existing && !changed) return existing; // if existing item and no changes, return existing item (no need to save)
+    if(item.validate_save()) this.set(item); // make it available in collection (if valid)
     // dynamically handle async init functions
     if (item.init instanceof AsyncFunction) return new Promise((resolve, reject) => { item.init(data).then(() => resolve(item)); });
     item.init(data); // handles functions that involve other items
@@ -160,6 +162,7 @@ class CollectionItem {
   update_data(data) {
     data = JSON.parse(JSON.stringify(data, this.update_data_replacer));
     deep_merge(this.data, data); // deep merge data
+    return true; // return true if data changed (default true)
   }
   update_data_replacer(key, value) {
     if (value instanceof CollectionItem) return value.ref;
