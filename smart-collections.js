@@ -117,7 +117,10 @@ class Collection {
   delete(key) {
     delete this.items[key];
     this.keys = this.keys.filter((k) => k !== key);
-    this.save();
+  }
+  delete_many(keys=[]) {
+    keys.forEach((key) => delete this.items[key]);
+    this.keys = Object.keys(this.items);
   }
   // CONVENIENCE METHODS (namespace getters)
   static get collection_name() { return this.name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }

@@ -26,11 +26,11 @@ class ObsidianAJSON extends LongTermMemory {
   }
   // wraps _save in timeout to prevent multiple saves at once
   save() {
-    if (this.save_timeout) clearTimeout(this.save_timeout);
+    if(this.save_timeout) clearTimeout(this.save_timeout);
     this.save_timeout = setTimeout(() => { this._save(); }, 10000);
   }
   // saves collection to file
-  async _save() {
+  async _save(force=false) {
     if (this.save_timeout) clearTimeout(this.save_timeout);
     this.save_timeout = null;
     if(this._saving) return console.log("Already saving: " + this.file_name);
@@ -40,7 +40,10 @@ class ObsidianAJSON extends LongTermMemory {
     console.log("Saving: " + this.file_name);
     try {
       const file_content = JSON.stringify(this.items, this.replacer.bind(this), 2);
-      if (file_content.length < 3) return console.log("File content empty, not saving"); // if file content empty, do not save
+      const new_size = file_content.length;
+      if(!force && (new_size < 100)) return console.log("File content empty, not saving"); // if file content empty, do not save
+      const old_size = (await this.adapter.stat(this.file_path)).size;
+      if(!force && (new_size < (0.8 * old_size))) return console.log("File content smaller than 80% of original, not saving"); // if file content smaller than 80% of original, do not save
       await this.adapter.write( this.file_path, file_content.slice(0, -1).slice(1) + ",\n" );
     } catch (err) {
       console.error("Error saving: " + this.file_name);
