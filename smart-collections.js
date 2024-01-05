@@ -38,7 +38,9 @@ class Collection {
       brain.collections[custom_collection_name] = this.constructor;
     }
     brain[this.collection_name].merge_defaults();
-    brain[this.collection_name].load();
+    // return promise if async
+    if(brain[this.collection_name].LTM.load instanceof AsyncFunction) return brain[this.collection_name].LTM.load().then(() => brain[this.collection_name]);
+    else brain[this.collection_name].load();
     return brain[this.collection_name];
   }
   // Merge defaults from all classes in the inheritance chain (from top to bottom, so child classes override parent classes)
@@ -56,10 +58,15 @@ class Collection {
   save() { this.LTM.save(); }
   load() { this.LTM.load(); }
   reviver(key, value) { // JSON.parse reviver
-    if (typeof value !== 'object' || value === null) return value; // skip non-objects, quick return
-    if (value.class_name) return new (this.brain.item_types[value.class_name])(this.brain, value);
+    if(typeof value !== 'object' || value === null) return value; // skip non-objects, quick return
+    if(value.class_name) return new (this.brain.item_types[value.class_name])(this.brain, value);
     return value;
   }
+  // reviver(key, value) { // JSON.parse reviver
+  //   if(typeof value !== 'object' || value === null) return value; // skip non-objects, quick return
+  //   if(value.class_name) this.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
+  //   return null;
+  // }
   replacer(key, value) { // JSON.stringify replacer
     if (value instanceof this.item_type) return value.data;
     if (value instanceof CollectionItem) return value.ref;
@@ -142,15 +149,15 @@ class CollectionItem {
     this.brain = brain;
     this.config = this.brain?.config;
     this.merge_defaults();
-    if (data) this.data = data;
+    if(data) this.data = data;
     this.data.class_name = this.constructor.name;
   }
   // Merge defaults from all classes in the inheritance chain (from top to bottom, so child classes override parent classes)
   merge_defaults() {
     let current_class = this.constructor;
-    while (current_class) { // deep merge defaults
-      for (let key in current_class.defaults) {
-        if (typeof current_class.defaults[key] === 'object') this[key] = { ...current_class.defaults[key], ...this[key] };
+    while(current_class) { // deep merge defaults
+      for(let key in current_class.defaults) {
+        if(typeof current_class.defaults[key] === 'object') this[key] = { ...current_class.defaults[key], ...this[key] };
         else this[key] = current_class.defaults[key];
       }
       current_class = Object.getPrototypeOf(current_class);

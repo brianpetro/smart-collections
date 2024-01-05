@@ -7,20 +7,25 @@ class ObsidianAJSON extends LongTermMemory {
   async load() {
     console.log("Loading: " + this.file_path);
     try {
-      const file_content = await this.adapter.read(this.file_path);
-      this.items = JSON.parse(`{${file_content.slice(0, -2)}}`, this.reviver.bind(this));
-      this.keys = Object.keys(this.items);
+      // replaced reviver b/c it was using too much memory
+      Object.entries(JSON.parse(`{${await this.adapter.read(this.file_path)}}`)).forEach(([key, value]) => {
+        this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
+        this.collection.keys.push(key);
+      });
+      console.log("Loaded: " + this.file_name);
     } catch (err) {
-      console.log("Error loading: " + this.data_path);
+      console.log("Error loading: " + this.file_path);
       console.log(err.stack); // stack trace
       // Create folder and file if they don't exist
-      try {
-        await this.adapter.mkdir(this.data_path);
-        await this.adapter.write(this.file_path, "");
-        this.items = {};
-        this.keys = [];
-      } catch (creationErr) {
-        console.log("Failed to create folder or file: ", creationErr);
+      if (err.code === 'ENOENT') {
+        try {
+          await this.adapter.mkdir(this.data_path);
+          await this.adapter.write(this.file_path, "");
+          this.items = {};
+          this.keys = [];
+        } catch (creationErr) {
+          console.log("Failed to create folder or file: ", creationErr);
+        }
       }
     }
   }
@@ -39,12 +44,14 @@ class ObsidianAJSON extends LongTermMemory {
     const start = Date.now();
     console.log("Saving: " + this.file_name);
     try {
-      const file_content = JSON.stringify(this.items, this.replacer.bind(this), 2);
+      // const file_content = JSON.stringify(this.items, this.replacer.bind(this), 2); // pretty print
+      const file_content = JSON.stringify(this.items, this.replacer.bind(this)); // minified
       const new_size = file_content.length;
       if(!force && (new_size < 100)) return console.log("File content empty, not saving"); // if file content empty, do not save
       const old_size = (await this.adapter.stat(this.file_path)).size;
       if(!force && (new_size < (0.8 * old_size))) return console.log("File content smaller than 80% of original, not saving"); // if file content smaller than 80% of original, do not save
-      await this.adapter.write( this.file_path, file_content.slice(0, -1).slice(1) + ",\n" );
+      // replaced slice with substring and removed comma (prefix appends with comma instead of suffix to prevent removal at load)
+      await this.adapter.write( this.file_path, file_content.substring(1, file_content.length - 1));
     } catch (err) {
       console.error("Error saving: " + this.file_name);
       console.error(err.stack);
