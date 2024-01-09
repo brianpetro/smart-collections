@@ -44,6 +44,9 @@ class Brain {
   get_ref(ref) { return this[ref.collection_name].get(ref.key); }
 }
 // BASE COLLECTION CLASSES
+/**
+ * Represents a collection of items.
+ */
 class Collection {
   constructor(brain) {
     this.brain = brain;
@@ -95,6 +98,11 @@ class Collection {
     return value;
   }
   // CREATE
+  /**
+   * Creates a new item or updates an existing one within the collection based on the provided data.
+   * @param {Object} data - The data to create a new item or update an existing one.
+   * @return {CollectionItem} The newly created or updated CollectionItem.
+   */
   create_or_update(data = {}) {
     const existing = this.find_by(data);
     const item = existing ? existing : new this.item_type(this.brain);
@@ -107,6 +115,11 @@ class Collection {
     item.init(data); // handles functions that involve other items
     return item;
   }
+  /**
+   * Finds an item in the collection that matches the given data.
+   * @param {Object} data - The criteria used to find the item.
+   * @return {CollectionItem|null} The found CollectionItem or null if not found.
+   */
   find_by(data) {
     if (!data.key) {
       const temp = new this.item_type(this.brain);
@@ -159,6 +172,9 @@ class Collection {
   get item_name() { return this.item_class_name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }
   get item_type() { return this.brain.item_types[this.item_class_name]; }
 }
+/**
+ * Represents an item within a collection.
+ */
 class CollectionItem {
   static get defaults() {
     return {
@@ -191,6 +207,10 @@ class CollectionItem {
     return md5(JSON.stringify(this.data));
   }
   // update_data - for data in this.data
+  /**
+   * Updates the data of this item.
+   * @param {Object} input_data - The new data for the item.
+   */
   update_data(data) {
     data = JSON.parse(JSON.stringify(data, this.update_data_replacer));
     deep_merge(this.data, data); // deep merge data
@@ -202,6 +222,11 @@ class CollectionItem {
     return value;
   }
   // init - for data not in this.data
+  /**
+   * Initializes the item with input_data, potentially asynchronously.
+   * Handles interactions with other collection items.
+   * @param {Object} input_data - The initial data for the item.
+   */
   init() { this.save(); } // should always call this.save() in child class init() overrides
   save() {
     if(!this.validate_save()){
