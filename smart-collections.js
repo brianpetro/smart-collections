@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) Brian Joseph Petro (WFH Brian)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
 const helpers = require('./helpers');
 const { md5, deep_merge, collection_instance_name_from } = helpers;
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor; // for checking if function is async
@@ -89,7 +111,7 @@ class Collection {
     if (!data.key) {
       const temp = new this.item_type(this.brain);
       temp.update_data(data);
-      data.key = temp.key;
+      if(temp.key) data.key = temp.key;
     }
     return data.key ? this.get(data.key) : null;
   }

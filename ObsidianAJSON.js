@@ -36,7 +36,7 @@ class ObsidianAJSON extends LongTermMemory {
   }
   // saves collection to file
   async _save(force=false) {
-    if (this.save_timeout) clearTimeout(this.save_timeout);
+    if(this.save_timeout) clearTimeout(this.save_timeout);
     this.save_timeout = null;
     if(this._saving) return console.log("Already saving: " + this.file_name);
     this._saving = true; // prevent multiple saves at once
