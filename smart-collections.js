@@ -33,9 +33,9 @@ class Brain {
     this.item_types = {};
     this.collections = {};
     this.ltm_adapter = ltm_adapter;
+    this.data_path = './test/data';
   }
   init() {
-    this.data_path = './test/data';
     this.load_collections();
   }
   load_collections() {
