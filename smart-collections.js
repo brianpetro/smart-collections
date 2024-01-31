@@ -64,7 +64,7 @@ class Collection {
     }
     brain[this.collection_name].merge_defaults();
     // return promise if async
-    if(brain[this.collection_name].LTM.load instanceof AsyncFunction) return brain[this.collection_name].LTM.load().then(() => brain[this.collection_name]);
+    if(brain[this.collection_name].load instanceof AsyncFunction) return brain[this.collection_name].load().then(() => brain[this.collection_name]);
     else brain[this.collection_name].load();
     return brain[this.collection_name];
   }
@@ -245,8 +245,15 @@ class CollectionItem {
   delete() { this.collection.delete(this.key); }
   // functional filter (returns true or false) for filtering items in collection; called by collection class
   filter(opts={}) {
-    if(opts.exclude_keys?.includes(this.key)) return false;
-    if(opts.key_ends_with && !this.key.endsWith(opts.key_ends_with)) return false;
+    const {
+      exclude_key,
+      exclude_keys = exclude_key ? [exclude_key] : [],
+      exclude_key_starts_with,
+      key_ends_with,
+    } = opts;
+    if(exclude_keys?.includes(this.key)) return false;
+    if(exclude_key_starts_with && this.key.startsWith(exclude_key_starts_with)) return false;
+    if(key_ends_with && !this.key.endsWith(key_ends_with)) return false;
     // OVERRIDE FILTER LOGIC here: pattern: if(opts.pattern && !this.data[opts.pattern.matcher]) return false;
     return true;
   }

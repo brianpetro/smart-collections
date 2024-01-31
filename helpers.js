@@ -24,18 +24,6 @@ function collection_instance_name_from(class_name) {
     + 's';
 }
 exports.collection_instance_name_from = collection_instance_name_from;
-// TIME
-function get_readable_duration(time_in_ms) {
-  const seconds = Math.floor(time_in_ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-  if (days > 0) return `${days} days`;
-  else if (hours > 0) return `${hours} hours`;
-  else if (minutes > 0) return `${minutes} minutes`;
-  else return null;
-}
-exports.get_readable_duration = get_readable_duration;
 // COSINE SIMILARITY
 function cos_sim(vector1, vector2) {
   const dotProduct = vector1.reduce((acc, val, i) => acc + val * vector2[i], 0);
