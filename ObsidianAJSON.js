@@ -49,17 +49,16 @@ class ObsidianAJSON extends LongTermMemory {
       const new_size = file_content.length;
       if(!force && (new_size < 100)) return console.log("File content empty, not saving"); // if file content empty, do not save
       const old_size = (await this.adapter.stat(this.file_path))?.size || 0;
-      if(!force && (new_size < (0.8 * old_size))) return console.log("File content smaller than 80% of original, not saving"); // if file content smaller than 80% of original, do not save
+      if(!force && (new_size < (0.8 * old_size))) return console.log("File content smaller than 80% of original, not saving " + this.file_name ); // if file content smaller than 80% of original, do not save
       // replaced slice with substring and removed comma (prefix appends with comma instead of suffix to prevent removal at load)
       await this.adapter.write( this.file_path, file_content.substring(1, file_content.length - 1));
+      const end = Date.now(); // log time
+      const time = end - start;
+      console.log("Saved " + this.file_name + " in " + time + "ms");
     } catch (err) {
       console.error("Error saving: " + this.file_name);
       console.error(err.stack);
-      return;
     }
-    const end = Date.now(); // log time
-    const time = end - start;
-    console.log("Saved " + this.file_name + " in " + time + "ms");
     this._saving = false;
   }
   get file_name() { return super.file_name + '.ajson'; }
