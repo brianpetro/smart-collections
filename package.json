@@ -1,6 +1,6 @@
 {
   "name": "smart-collections",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "description": "Convenient interface for managing collections of items.",
   "main": "smart-collections.js",
   "scripts": {
