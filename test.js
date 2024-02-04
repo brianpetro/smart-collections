@@ -1,5 +1,6 @@
 const test = require('ava');
 const { init_brain, init_test_item } = require('./test_env');
+const { create_uid } = require('./helpers');
 test.beforeEach((t) => {
   init_brain(t);
   init_test_item(t);
@@ -162,7 +163,7 @@ test('CollectionItem filter returns false if item key is in exclude_keys', async
 
 test('CollectionItem get_key returns md5 hash of JSON.stringify(this.data)', async (t) => {
   const { test_item } = t.context;
-  t.is(test_item.get_key(), 'bdbe9d1ea525cbf3210538e33d8e09c1');
+  t.is(test_item.get_key(), '13582486438');
 });
 
 test('CollectionItem collection getter returns the collection for the item', async (t) => {
@@ -184,4 +185,38 @@ test('CollectionItem key getter returns the sub class get_key() value', async (t
   const { brain } = t.context;
   const child = brain.childs.create_or_update();
   t.is(child.key, 'child_key');
+});
+
+test('create_uid(any)-> returns a string', async (t) => {
+  const data_1 = ["test", { new: "test" }];
+  const len_1 = JSON.stringify(data_1).length;
+  const resp_1 = create_uid(data_1);
+  t.is(typeof resp_1, "string");
+  t.is(resp_1.endsWith(len_1), true);
+  const data_2 = { test: "test", new: "test" };
+  const len_2 = JSON.stringify(data_2).length;
+  const resp_2 = create_uid(data_2);
+  t.is(typeof resp_2, "string");
+  t.is(resp_2.endsWith(len_2), true);
+  const data_3 = "test";
+  const len_3 = JSON.stringify(data_3).length;
+  const resp_3 = create_uid(data_3);
+  t.is(typeof resp_3, "string");
+  t.is(resp_3.endsWith(len_3), true);
+  const data_4 = 1234;
+  const len_4 = JSON.stringify(data_4).length;
+  const resp_4 = create_uid(data_4);
+  t.is(typeof resp_4, "string");
+  t.is(resp_4.endsWith(len_4), true);
+  const data_5 = null;
+  const len_5 = JSON.stringify(data_5).length;
+  const resp_5 = create_uid(data_5);
+  t.is(typeof resp_5, "string");
+  t.is(resp_5.endsWith(len_5), true);
+  const data_6 = true;
+  const len_6 = JSON.stringify(data_6).length;
+  const resp_6 = create_uid(data_6);
+  t.is(typeof resp_6, "string");
+  t.is(resp_6.endsWith(len_6), true);
+  // does not handle undefined because JSON.stringify(undefined) returns undefined
 });

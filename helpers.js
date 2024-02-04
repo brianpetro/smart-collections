@@ -1,7 +1,22 @@
 // HASHING
-const crypto = require('crypto');
-function md5(string) { return crypto.createHash('md5').update(String(string)).digest('hex'); }
-exports.md5 = md5;
+// const crypto = require('crypto');
+// function md5(string) { return crypto.createHash('md5').update(String(string)).digest('hex'); }
+// exports.md5 = md5;
+// create uid from embed_input_arr without using md5/crypto
+function create_uid(data) {
+  const str = JSON.stringify(data);
+  let hash = 0;
+  if (str.length === 0) return hash;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+    // remove negative sign
+    if (hash < 0) hash = hash * -1;
+  }
+  return hash.toString() + str.length;
+}
+exports.create_uid = create_uid;
 // DEEP MERGE
 function deep_merge(target, source) {
   for (const key in source) {
