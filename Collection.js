@@ -1,5 +1,9 @@
 const { CollectionItem } = require('./CollectionItem');
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor; // for checking if function is async
+const helpers = require('./helpers');
+const {
+  deep_merge,
+} = helpers;
 
 // BASE COLLECTION CLASSES
 /**
@@ -80,12 +84,13 @@ class Collection {
    * @return {CollectionItem|null} The found CollectionItem or null if not found.
    */
   find_by(data) {
-    if (!data.key) {
-      const temp = new this.item_type(this.brain);
-      temp.update_data(data);
-      if (temp.key) data.key = temp.key;
-    }
-    return data.key ? this.get(data.key) : null;
+    if(data.key) return this.get(data.key);
+    const temp = new this.item_type(this.brain);
+    const temp_data = JSON.parse(JSON.stringify(data, temp.update_data_replacer));
+    deep_merge(temp.data, temp_data); // deep merge data
+    // temp.update_data(data); // call deep merge directly to prevent double call of update_data in sub-classes
+    // if (temp.key) temp_data.key = temp.key;
+    return temp.key ? this.get(temp.key) : null;
   }
   // READ
   filter(opts) { return this.keys.filter(key => this.items[key].filter(opts)).map((key) => this.items[key]); }
