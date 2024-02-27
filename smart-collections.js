@@ -22,6 +22,7 @@
 */
 const { LongTermMemory: LTM } = require('./long_term_memory.js');
 const { AJSON } = require('./AJSON.js');
+const { ScJSON } = require('./ScJSON.js');
 const { ObsidianAJSON } = require('./ObsidianAJSON.js');
 const { Brain } = require('./Brain');
 const { Collection } = require('./Collection');
@@ -32,4 +33,5 @@ exports.Collection = Collection;
 exports.CollectionItem = CollectionItem;
 exports.LongTermMemory = LTM;
 exports.AJSON = AJSON;
+exports.ScJSON = ScJSON;
 exports.ObsidianAJSON = ObsidianAJSON;

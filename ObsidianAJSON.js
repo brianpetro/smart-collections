@@ -18,11 +18,11 @@ class ObsidianAJSON extends LongTermMemory {
       console.log(err.stack); // stack trace
       // Create folder and file if they don't exist
       if (err.code === 'ENOENT') {
+        this.items = {};
+        this.keys = [];
         try {
           await this.adapter.mkdir(this.data_path);
           await this.adapter.write(this.file_path, "");
-          this.items = {};
-          this.keys = [];
         } catch (creationErr) {
           console.log("Failed to create folder or file: ", creationErr);
         }
