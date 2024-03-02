@@ -43,21 +43,40 @@ class ObsAJSON extends LongTermMemory {
     setTimeout(() => { this._saving = false; }, 10000); // set _saving to false after 10 seconds
     const start = Date.now();
     console.log("Saving: " + this.file_name);
+    // rename old file
+    const old_file_path = this.file_path.replace('.ajson', '.old.ajson');
     try {
-      const file_content = Object.values(this.items).filter(i => i.vec).map(i => i.ajson).join(",");
-      // console.log(file_content);
-      const new_size = file_content.length;
-      // console.log("File content size: " + new_size);
-      if(!force && (new_size < 100)) return console.log("File content empty, not saving"); // if file content empty, do not save
-      const old_size = (await this.adapter.stat(this.file_path))?.size || 0;
-      if(!force && (new_size < (0.8 * old_size))) return console.log("File content smaller than 80% of original, not saving " + this.file_name ); // if file content smaller than 80% of original, do not save
-      await this.adapter.write( this.file_path, file_content);
+      if(await this.adapter.exists(old_file_path)) await this.adapter.remove(old_file_path);
+      if(await this.adapter.exists(this.file_path)) await this.adapter.rename(this.file_path, old_file_path);
+      let file_content = [];
+      const items = Object.values(this.items).filter(i => i.vec);
+      const batches = Math.ceil(items.length / 1000);
+
+      for(let i = 0; i < batches; i++) {
+        file_content = items.slice(i * 1000, (i + 1) * 1000).map(i => i.ajson);
+        const batch_content = file_content.join(",");
+        if(i > 0) await this.adapter.append(this.file_path, ",");
+        await this.adapter.append(this.file_path, batch_content);
+      }
+      // append last batch
+      if(items.length > batches * 1000) {
+        await this.adapter.append(this.file_path, ",");
+        await this.adapter.append(this.file_path, items.slice(batches * 1000).map(i => i.ajson).join(","));
+      }
+
       const end = Date.now(); // log time
       const time = end - start;
       console.log("Saved " + this.file_name + " in " + time + "ms");
+      // remove old file after new file is saved
+      if(await this.adapter.exists(old_file_path)) await this.adapter.remove(old_file_path);
     } catch (err) {
       console.error("Error saving: " + this.file_name);
       console.error(err.stack);
+      // set new file to "failed" and rename to inlclude datetime
+      const failed_file_path = this.file_path.replace('.ajson', '-' + Date.now() + '.failed.ajson');
+      // move old file back if new file fails to save
+      await this.adapter.rename(this.file_path, failed_file_path);
+      await this.adapter.rename(old_file_path, this.file_path);
     }
     this._saving = false;
   }
