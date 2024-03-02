@@ -43,11 +43,11 @@ class ObsAJSON extends LongTermMemory {
     setTimeout(() => { this._saving = false; }, 10000); // set _saving to false after 10 seconds
     const start = Date.now();
     console.log("Saving: " + this.file_name);
-    // rename old file
-    const old_file_path = this.file_path.replace('.ajson', '.old.ajson');
+    // rename temp file
+    const temp_file_path = this.file_path.replace('.ajson', '.temp.ajson');
+    if(await this.adapter.exists(temp_file_path)) await this.adapter.remove(temp_file_path);
     try {
-      if(await this.adapter.exists(old_file_path)) await this.adapter.remove(old_file_path);
-      if(await this.adapter.exists(this.file_path)) await this.adapter.rename(this.file_path, old_file_path);
+      if(await this.adapter.exists(this.file_path)) await this.adapter.rename(this.file_path, temp_file_path);
       let file_content = [];
       const items = Object.values(this.items).filter(i => i.vec);
       const batches = Math.ceil(items.length / 1000);
@@ -67,18 +67,18 @@ class ObsAJSON extends LongTermMemory {
       const end = Date.now(); // log time
       const time = end - start;
       console.log("Saved " + this.file_name + " in " + time + "ms");
-      // remove old file after new file is saved
-      if(await this.adapter.exists(old_file_path)) await this.adapter.remove(old_file_path);
     } catch (err) {
       console.error("Error saving: " + this.file_name);
       console.error(err.stack);
       // set new file to "failed" and rename to inlclude datetime
       const failed_file_path = this.file_path.replace('.ajson', '-' + Date.now() + '.failed.ajson');
-      // move old file back if new file fails to save
+      // move temp file back if new file fails to save
       await this.adapter.rename(this.file_path, failed_file_path);
-      await this.adapter.rename(old_file_path, this.file_path);
+      await this.adapter.rename(temp_file_path, this.file_path);
     }
     this._saving = false;
+    // remove temp file after new file is saved
+    if(await this.adapter.exists(temp_file_path)) await this.adapter.remove(temp_file_path);
   }
   get file_name() { return super.file_name + '.ajson'; }
 }
