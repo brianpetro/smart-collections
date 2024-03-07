@@ -54,6 +54,8 @@ class ObsAJSON extends LongTermMemory {
     const temp_file_path = this.file_path.replace('.ajson', '.temp.ajson');
     if(await this.adapter.exists(temp_file_path)) await this.adapter.remove(temp_file_path);
     try {
+      // init temp file
+      await this.adapter.write(temp_file_path, "");
       let file_content = [];
       const items = Object.values(this.items).filter(i => i.vec);
       const batches = Math.ceil(items.length / 1000);
