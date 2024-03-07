@@ -10,7 +10,7 @@ class ObsidianAJSON extends LongTermMemory {
       // replaced reviver b/c it was using too much memory
       Object.entries(JSON.parse(`{${await this.adapter.read(this.file_path)}}`)).forEach(([key, value]) => {
         this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
-        this.collection.keys.push(key);
+        // this.collection.keys.push(key); // replaced by getter
       });
       console.log("Loaded: " + this.file_name);
     } catch (err) {
@@ -19,7 +19,7 @@ class ObsidianAJSON extends LongTermMemory {
       // Create folder and file if they don't exist
       if (err.code === 'ENOENT') {
         this.items = {};
-        this.keys = [];
+        // this.keys = []; // replaced by getter
         try {
           await this.adapter.mkdir(this.data_path);
           await this.adapter.write(this.file_path, "");

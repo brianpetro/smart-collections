@@ -16,7 +16,7 @@ class LongTermMemory {
   get items() { return this.collection.items; }
   set items(items) { this.collection.items = items; }
   get keys() { return this.collection.keys; }
-  set keys(keys) { this.collection.keys = keys; }
+  // set keys(keys) { this.collection.keys = keys; } // replaced by getter
   async load() { }
   save() { if (this.constructor.name !== 'LongTermMemory') console.log("called default, override me"); }
   async _save() { if (this.constructor.name !== 'LongTermMemory') console.log("called default, override me"); }

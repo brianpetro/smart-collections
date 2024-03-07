@@ -9,7 +9,7 @@ class AJSON extends LongTermMemory {
     try {
       const file_content = fs.readFileSync(this.file_path, 'utf8');
       this.items = JSON.parse(`{${file_content.slice(0, -2)}}`, this.reviver.bind(this));
-      this.keys = Object.keys(this.items);
+      // this.keys = Object.keys(this.items); // replaced by getter
       // console.log("Loaded " + this.file_path + " in " + (Date.now() - timestamp) + "ms");
     } catch (err) {
       console.log("Error loading: " + this.file_path);
@@ -20,7 +20,7 @@ class AJSON extends LongTermMemory {
         fs.mkdirSync(this.data_path, { recursive: true });
         fs.writeFileSync(this.file_path, "");
         this.items = {};
-        this.keys = [];
+        // this.keys = []; // replaced by getter
       } catch (creationErr) {
         console.log("Failed to create folder or file: ", creationErr);
       }

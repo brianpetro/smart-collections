@@ -8,9 +8,16 @@ class ObsAJSON extends LongTermMemory {
     console.log("Loading: " + this.file_path);
     try {
       // replaced reviver b/c it was using too much memory
-      Object.entries(JSON.parse(`{${await this.adapter.read(this.file_path)}}`)).forEach(([key, value]) => {
-        this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
-        this.collection.keys.push(key);
+      // Object.entries(JSON.parse(`{${await this.adapter.read(this.file_path)}}`)).forEach(([key, value]) => {
+      //   this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
+      //   this.collection.keys.push(key);
+      // });
+      (await this.adapter.read(this.file_path)).split(",\n").forEach((batch, i) => {
+        const items = JSON.parse(`{${batch}}`);
+        Object.entries(items).forEach(([key, value]) => {
+          this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
+          // this.collection.keys.push(key);
+        });
       });
       console.log("Loaded: " + this.file_name);
     } catch (err) {
@@ -19,7 +26,7 @@ class ObsAJSON extends LongTermMemory {
       // Create folder and file if they don't exist
       if (err.code === 'ENOENT') {
         this.items = {};
-        this.keys = [];
+        // this.keys = []; // replaced by getter
         try {
           await this.adapter.mkdir(this.data_path);
           await this.adapter.write(this.file_path, "");
@@ -55,7 +62,8 @@ class ObsAJSON extends LongTermMemory {
       for(let i = 0; i < batches; i++) {
         file_content = items.slice(i * 1000, (i + 1) * 1000).map(i => i.ajson);
         const batch_content = file_content.join(",");
-        if(i > 0) await this.adapter.append(this.file_path, ",");
+        // if(i > 0) await this.adapter.append(this.file_path, ",");
+        if(i > 0) await this.adapter.append(this.file_path, ",\n");
         await this.adapter.append(this.file_path, batch_content);
       }
       // append last batch
@@ -78,7 +86,7 @@ class ObsAJSON extends LongTermMemory {
     }
     this._saving = false;
     // remove temp file after new file is saved
-    if(await this.adapter.exists(temp_file_path)) await this.adapter.remove(temp_file_path);
+    if(await this.adapter.exists(temp_file_path) && await this.adapter.exists(this.file_path)) await this.adapter.remove(temp_file_path);
   }
   get file_name() { return super.file_name + '.ajson'; }
 }

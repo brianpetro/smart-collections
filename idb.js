@@ -30,7 +30,7 @@ class IDBLTM extends LongTermMemory {
     const items = await Promise.all(keys.map(key => this.db.get(this.file_name, key)));
     for(let i = 0; i < keys.length; i++) {
       this.collection.items[keys[i]] = JSON.parse(items[i], this.reviver.bind(this));
-      this.collection.keys.push(keys[i]);
+      // this.collection.keys.push(keys[i]); // replaced by getter
     }
     console.log("Loaded " + this.collection.keys.length + ' items from ' + this.file_name + " in " + (Date.now() - time) + "ms");
   }

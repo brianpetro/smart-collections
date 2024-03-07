@@ -14,7 +14,7 @@ class Collection {
     this.brain = brain;
     this.config = this.brain.config;
     this.items = {};
-    this.keys = [];
+    // this.keys = []; // replaced by getter
     this.LTM = this.brain.ltm_adapter.wake_up(this, this.brain.ltm_adapter);
   }
   static load(brain, config = {}) {
@@ -93,7 +93,8 @@ class Collection {
     return temp.key ? this.get(temp.key) : null;
   }
   // READ
-  filter(opts) { return this.keys.filter(key => this.items[key].filter(opts)).map((key) => this.items[key]); }
+  // filter(opts) { return this.keys.filter(key => this.items[key].filter(opts)).map((key) => this.items[key]); }
+  filter(opts) { return Object.entries(this.items).filter(([key, item]) => item.filter(opts)).map(([key, item]) => item); }
   get(key) { return this.items[key]; }
   get_many(keys = []) {
     if (Array.isArray(keys)) return keys.map((key) => this.get(key));
@@ -112,26 +113,27 @@ class Collection {
   set(item) {
     if (!item.key) throw new Error("Item must have key property");
     this.items[item.key] = item;
-    if (!this.keys.includes(item.key)) this.keys.push(item.key);
+    // if (!this.keys.includes(item.key)) this.keys.push(item.key); // this.keys replaced by getter
   }
   update_many(keys = [], data = {}) { this.get_many(keys).forEach((item) => item.update_data(data)); }
   // DESTROY
   clear() {
     this.items = {};
-    this.keys = [];
+    // this.keys = []; // replaced by getter
   }
   delete(key) {
     delete this.items[key];
-    this.keys = this.keys.filter((k) => k !== key);
+    // this.keys = this.keys.filter((k) => k !== key); // replaced by getter
   }
   delete_many(keys = []) {
     keys.forEach((key) => delete this.items[key]);
-    this.keys = Object.keys(this.items);
+    // this.keys = Object.keys(this.items); // replaced by getter
   }
   // CONVENIENCE METHODS (namespace getters)
   static get collection_name() { return this.name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }
   get collection_name() { return (this._collection_name) ? this._collection_name : this.constructor.collection_name; }
   set collection_name(name) { this._collection_name = name; }
+  get keys() { return Object.keys(this.items); }
   get item_class_name() { return this.constructor.name.slice(0, -1).replace(/(ie)$/g, 'y'); } // remove 's' from end of name & if name ends in 'ie', replace with 'y'
   get item_name() { return this.item_class_name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }
   get item_type() { return this.brain.item_types[this.item_class_name]; }

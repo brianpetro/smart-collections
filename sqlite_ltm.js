@@ -31,7 +31,7 @@ class SQLiteLTM extends LongTermMemory {
       }
       rows.forEach((row) => {
         this.collection.items[row.key] = new (this.brain.item_types[row.class_name])(this.brain, row);
-        this.collection.keys.push(row.key);
+        // this.collection.keys.push(row.key); // replaced by getter
       });
       // console.log("Loaded: " + this.file_name);
       console.log("Loaded " + this.collection.keys.length + ' items from ' + this.file_name + " in " + (Date.now() - time) + "ms");
