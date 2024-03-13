@@ -78,11 +78,18 @@ class CollectionItem {
   // functional filter (returns true or false) for filtering items in collection; called by collection class
   filter(opts = {}) {
     const {
-      exclude_key, exclude_keys = exclude_key ? [exclude_key] : [], exclude_key_starts_with, key_ends_with,
+      exclude_key,
+      exclude_keys = exclude_key ? [exclude_key] : [],
+      exclude_key_starts_with,
+      key_ends_with,
+      key_starts_with,
+      key_starts_with_any,
     } = opts;
     if (exclude_keys?.includes(this.key)) return false;
     if (exclude_key_starts_with && this.key.startsWith(exclude_key_starts_with)) return false;
     if (key_ends_with && !this.key.endsWith(key_ends_with)) return false;
+    if (key_starts_with && !this.key.startsWith(key_starts_with)) return false;
+    if (key_starts_with_any && !key_starts_with_any.some((prefix) => this.key.startsWith(prefix))) return false;
     // OVERRIDE FILTER LOGIC here: pattern: if(opts.pattern && !this.data[opts.pattern.matcher]) return false;
     return true;
   }
