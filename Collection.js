@@ -95,6 +95,8 @@ class Collection {
   // READ
   // filter(opts) { return this.keys.filter(key => this.items[key].filter(opts)).map((key) => this.items[key]); }
   filter(opts) { return Object.entries(this.items).filter(([key, item]) => item.filter(opts)).map(([key, item]) => item); }
+  async retrieve(strategy, opts={}) {
+  }
   get(key) { return this.items[key]; }
   get_many(keys = []) {
     if (Array.isArray(keys)) return keys.map((key) => this.get(key));
@@ -139,3 +141,32 @@ class Collection {
   get item_type() { return this.brain.item_types[this.item_class_name]; }
 }
 exports.Collection = Collection;
+
+/**
+ * Sequentially executes an array of asynchronous functions, passing the result of each function
+ * as the input to the next, along with an optional options object.
+ * 
+ * @param {Function[]} funcs - An array of functions to execute sequentially (may be async functions).
+ * @param {*} initial_value - The initial value to pass to the first function in the array.
+ * @param {Object} opts - Optional parameters to pass to each function.
+ * @returns {*} The final value after all functions have been executed.
+ * @throws {Error} Throws an error if any function in the array is not actually a function or if an async function throws an error.
+ */
+async function sequential_async_processor(funcs, initial_value, opts = {}) {
+  let value = initial_value;
+  for (const func of funcs) {
+    // Ensure each element is a function before attempting to call it
+    if (typeof func !== 'function') {
+      throw new TypeError('All elements in async_functions array must be functions');
+    }
+    try {
+      value = await func(value, opts);
+    } catch (error) {
+      // console.error("Error encountered during sequential processing:", error);
+      throw error; // Rethrow to halt execution, or handle differently if continuation is desired
+    }
+  }
+
+  return value;
+}
+exports.sequential_async_processor = sequential_async_processor;

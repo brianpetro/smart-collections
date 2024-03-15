@@ -4,7 +4,7 @@
   "description": "Convenient interface for managing collections of items.",
   "main": "smart-collections.js",
   "scripts": {
-    "test": "npx ava test.js"
+    "test": "npx ava --verbose"
   },
   "repository": {
     "type": "git",
@@ -25,5 +25,11 @@
   "homepage": "https://github.com/brianpetro/smart-collections#readme",
   "devDependencies": {
     "ava": "^5.3.1"
+  },
+  "ava": {
+    "files": [
+      "test.js",
+      "*.test.js"
+    ]
   }
 }
