@@ -93,19 +93,43 @@ class Collection {
     return temp.key ? this.get(temp.key) : null;
   }
   // READ
-  // filter(opts) { return this.keys.filter(key => this.items[key].filter(opts)).map((key) => this.items[key]); }
+  /**
+   * Filters the items in the collection based on the provided options.
+   * @param {Object} opts - The options used to filter the items.
+   */
   filter(opts) { return Object.entries(this.items).filter(([key, item]) => item.filter(opts)).map(([key, item]) => item); }
-  async retrieve(strategy, opts={}) {
-  }
+  /**
+   * Retrieves items from the collection based on the provided strategy and options.
+   * @param {Function[]} strategy - The strategy used to retrieve the items.
+   * @param {Object} opts - The options used to retrieve the items.
+   * @return {CollectionItem[]} The retrieved items.
+   * @throws {Error} Throws an error if any function in the strategy array is not actually a function or if an async function throws an error.
+   */
+  async retrieve(strategy=[], opts={}) { return await sequential_async_processor(funcs, this.filter(opts), opts); }
+  /**
+   * Retrieves a single item from the collection based on the provided strategy and options.
+   * @param {String} key - The key of the item to retrieve.
+   * @return {CollectionItem} The retrieved item.
+   */
   get(key) { return this.items[key]; }
+  /**
+   * Retrieves multiple items from the collection based on the provided keys.
+   * @param {String[]} keys - The keys of the items to retrieve.
+   * @return {CollectionItem[]} The retrieved items.
+   */
   get_many(keys = []) {
     if (Array.isArray(keys)) return keys.map((key) => this.get(key));
     console.error("get_many called with non-array keys: ", keys);
   }
-  get_rand(filter_opts = null) {
-    if (filter_opts) {
+  /**
+   * Retrieves a random item from the collection based on the provided options.
+   * @param {Object} opts - The options used to retrieve the item.
+   * @return {CollectionItem} The retrieved item.
+   */
+  get_rand(opts = null) {
+    if (opts) {
       // console.log("filter_opts: ", filter_opts);
-      const filtered = this.filter(filter_opts);
+      const filtered = this.filter(opts);
       // console.log("filtered: " + filtered.length);
       return filtered[Math.floor(Math.random() * filtered.length)];
     }
