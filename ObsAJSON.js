@@ -12,13 +12,17 @@ class ObsAJSON extends LongTermMemory {
       //   this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
       //   this.collection.keys.push(key);
       // });
-      (await this.adapter.read(this.file_path)).split(",\n").forEach((batch, i) => {
-        const items = JSON.parse(`{${batch}}`);
-        Object.entries(items).forEach(([key, value]) => {
-          this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
-          // this.collection.keys.push(key);
-        });
-      });
+      (await this.adapter.read(this.file_path))
+        .split(",\n")
+        .filter(batch => batch) // remove empty strings
+        .forEach((batch, i) => {
+          const items = JSON.parse(`{${batch}}`);
+          Object.entries(items).forEach(([key, value]) => {
+            this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
+            // this.collection.keys.push(key);
+          });
+        })
+      ;
       console.log("Loaded: " + this.file_name);
     } catch (err) {
       console.log("Error loading: " + this.file_path);
@@ -62,8 +66,7 @@ class ObsAJSON extends LongTermMemory {
       for(let i = 0; i < batches; i++) {
         file_content = items.slice(i * 1000, (i + 1) * 1000).map(i => i.ajson);
         const batch_content = file_content.join(",");
-        if(i > 0) await this.adapter.append(temp_file_path, ",\n");
-        await this.adapter.append(temp_file_path, batch_content);
+        await this.adapter.append(temp_file_path, batch_content + ",\n");
       }
       // append last batch
       if(items.length > batches * 1000) {
