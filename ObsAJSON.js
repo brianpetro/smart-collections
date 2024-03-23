@@ -70,8 +70,7 @@ class ObsAJSON extends LongTermMemory {
       }
       // append last batch
       if(items.length > batches * 1000) {
-        await this.adapter.append(temp_file_path, ",\n");
-        await this.adapter.append(temp_file_path, items.slice(batches * 1000).map(i => i.ajson).join(","));
+        await this.adapter.append(temp_file_path, items.slice(batches * 1000).map(i => i.ajson).join(",") + ",\n");
       }
       const end = Date.now(); // log time
       const time = end - start;
