@@ -2,14 +2,14 @@ const { LongTermMemory } = require('./long_term_memory');
 class ObsAJSON extends LongTermMemory {
   constructor(collection) {
     super(collection);
-    this.adapter = this.brain.main.app.vault.adapter;
+    this.adapter = this.env.main.app.vault.adapter;
   }
   async load() {
     console.log("Loading: " + this.file_path);
     try {
       // replaced reviver b/c it was using too much memory
       // Object.entries(JSON.parse(`{${await this.adapter.read(this.file_path)}}`)).forEach(([key, value]) => {
-      //   this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
+      //   this.collection.items[key] = new (this.env.item_types[value.class_name])(this.env, value);
       //   this.collection.keys.push(key);
       // });
       (await this.adapter.read(this.file_path))
@@ -18,7 +18,7 @@ class ObsAJSON extends LongTermMemory {
         .forEach((batch, i) => {
           const items = JSON.parse(`{${batch}}`);
           Object.entries(items).forEach(([key, value]) => {
-            this.collection.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
+            this.collection.items[key] = new (this.env.item_types[value.class_name])(this.env, value);
             // this.collection.keys.push(key);
           });
         })

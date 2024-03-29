@@ -10,25 +10,26 @@ const {
  * Represents a collection of items.
  */
 class Collection {
-  constructor(brain) {
-    this.brain = brain;
-    this.config = this.brain.config;
+  constructor(env) {
+    this.env = env;
+    this.brain = this.env; // DEPRECATED: use env instead of brain
+    this.config = this.env.config;
     this.items = {};
     // this.keys = []; // replaced by getter
-    this.LTM = this.brain.ltm_adapter.wake_up(this, this.brain.ltm_adapter);
+    this.LTM = this.env.ltm_adapter.wake_up(this, this.env.ltm_adapter);
   }
-  static load(brain, config = {}) {
+  static load(env, config = {}) {
     const { custom_collection_name } = config;
-    brain[this.collection_name] = new this(brain);
+    env[this.collection_name] = new this(env);
     if (custom_collection_name) {
-      brain[this.collection_name].collection_name = custom_collection_name;
-      brain.collections[custom_collection_name] = this.constructor;
+      env[this.collection_name].collection_name = custom_collection_name;
+      env.collections[custom_collection_name] = this.constructor;
     }
-    brain[this.collection_name].merge_defaults();
+    env[this.collection_name].merge_defaults();
     // return promise if async
-    if (brain[this.collection_name].load instanceof AsyncFunction) return brain[this.collection_name].load().then(() => brain[this.collection_name]);
-    else brain[this.collection_name].load();
-    return brain[this.collection_name];
+    if (env[this.collection_name].load instanceof AsyncFunction) return env[this.collection_name].load().then(() => env[this.collection_name]);
+    else env[this.collection_name].load();
+    return env[this.collection_name];
   }
   // Merge defaults from all classes in the inheritance chain (from top to bottom, so child classes override parent classes)
   merge_defaults() {
@@ -36,7 +37,8 @@ class Collection {
     while (current_class) { // merge collection config into item config
       const col_conf = this.config?.collections?.[current_class.collection_name];
       Object.entries((typeof col_conf === 'object') ? col_conf : {})
-        .forEach(([key, value]) => this[key] = value);
+        .forEach(([key, value]) => this[key] = value)
+      ;
       current_class = Object.getPrototypeOf(current_class);
     }
     // console.log(Object.keys(this));
@@ -46,12 +48,12 @@ class Collection {
   load() { this.LTM.load(); }
   reviver(key, value) {
     if (typeof value !== 'object' || value === null) return value; // skip non-objects, quick return
-    if (value.class_name) return new (this.brain.item_types[value.class_name])(this.brain, value);
+    if (value.class_name) return new (this.env.item_types[value.class_name])(this.env, value);
     return value;
   }
   // reviver(key, value) { // JSON.parse reviver
   //   if(typeof value !== 'object' || value === null) return value; // skip non-objects, quick return
-  //   if(value.class_name) this.items[key] = new (this.brain.item_types[value.class_name])(this.brain, value);
+  //   if(value.class_name) this.items[key] = new (this.env.item_types[value.class_name])(this.env, value);
   //   return null;
   // }
   replacer(key, value) {
@@ -67,7 +69,7 @@ class Collection {
    */
   create_or_update(data = {}) {
     const existing = this.find_by(data);
-    const item = existing ? existing : new this.item_type(this.brain);
+    const item = existing ? existing : new this.item_type(this.env);
     item.is_new = !!!existing;
     const changed = item.update_data(data); // handles this.data
     if (existing && !changed) return existing; // if existing item and no changes, return existing item (no need to save)
@@ -85,7 +87,7 @@ class Collection {
    */
   find_by(data) {
     if(data.key) return this.get(data.key);
-    const temp = new this.item_type(this.brain);
+    const temp = new this.item_type(this.env);
     const temp_data = JSON.parse(JSON.stringify(data, temp.update_data_replacer));
     deep_merge(temp.data, temp_data); // deep merge data
     // temp.update_data(data); // call deep merge directly to prevent double call of update_data in sub-classes
@@ -162,7 +164,7 @@ class Collection {
   get keys() { return Object.keys(this.items); }
   get item_class_name() { return this.constructor.name.slice(0, -1).replace(/(ie)$/g, 'y'); } // remove 's' from end of name & if name ends in 'ie', replace with 'y'
   get item_name() { return this.item_class_name.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase(); }
-  get item_type() { return this.brain.item_types[this.item_class_name]; }
+  get item_type() { return this.env.item_types[this.item_class_name]; }
 }
 exports.Collection = Collection;
 
